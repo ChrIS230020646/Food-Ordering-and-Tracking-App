@@ -1,0 +1,31 @@
+# ==================== backend ignores files ====================
+# Maven Compile output
+backend/target/
+
+# ==================== Frontend ignores files ====================
+# Node.js rely
+frontend/node_modules/
+
+# ==================== IDE/Editor Files ====================
+# VS Code
+.vscode/
+
+# ==================== System files ====================
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# ==================== Documentation file ====================
+# Word 文档
+*.docx
+
+# ==================== Other ====================
+# temporary files
+*.tmp
+*.temp
+
+# log file
+*.log
