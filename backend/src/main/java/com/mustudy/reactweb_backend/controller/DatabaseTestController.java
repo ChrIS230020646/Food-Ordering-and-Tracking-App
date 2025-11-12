@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/db-test")
+@RequestMapping("/api/db-food_order_system")
 @CrossOrigin(origins = "http://localhost:5173")
 public class DatabaseTestController {
     
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
-    @GetMapping("/test")
+    @GetMapping("/food_order_system")
     public String testConnection() {
         try {
             Integer result = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
