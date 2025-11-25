@@ -17,3 +17,11 @@ OR you can
 cd to yourpath
 **copy this and run:** npm run install:all
                        npm run dev
+
+# for macos
+```cmd
+cd backend
+chmod +x mvnw
+cd ..
+npm run dev
+```
