@@ -1,0 +1,8 @@
+# 測試文件夾的 gitignore
+# 不提交敏感配置文件
+
+env.local
+*.local
+*.log
+
+
