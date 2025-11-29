@@ -29,6 +29,12 @@ export const Home = () => {
                     >
                         🔐 Click here to login
                     </Link>
+                    <Link
+                        to="/menu-test"
+                        className="text-red-500 hover:text-red-700 underline text-lg transition-colors duration-200 text-center"
+                    >
+                        🍔 Click here to test the menu API
+                    </Link>
 
                     <p className="mt-4 text-gray-600">or use path /backend-test </p>
                 </div>

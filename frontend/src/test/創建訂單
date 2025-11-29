@@ -1,0 +1,39 @@
+從購物車落order，注意customer落order嘅流程係一定要將商品加入購物車度先！！！
+async function createOrder() {
+  try {
+    const response = await fetch('http://localhost:8080/api/orders/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        custid: 1, 顧客id (必須)
+        restid: 1, 餐廳id (必須)
+        addressid: 1, 地址id (必須)
+        shippingAddress: '123 Main St, Central, HK', 配送地址 (必須)
+        remark: '備注' (可選)
+      })
+    });
+    
+    const data = await response.json();
+    console.log('創建訂單結果:', data);
+    
+    if (data.success) {
+        data.order 包含了訂單的詳細信息:
+
+        orderId: 訂單id
+        status: 訂單狀態分別有： 'pending' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled'
+        totalAmount: 總金額
+        discountAmount: 則扣金額
+        remark: 備注
+        createdTime: 創建時間
+        customerName: 顧客名
+        restaurantName: 餐廳名
+        shippingAddress: 配送地址
+      
+      console.log('ordre創建成功，order id:', data.order.orderId);
+    }
+  } catch (error) {
+    console.error('create order 失敗:', error);
+  }
+}

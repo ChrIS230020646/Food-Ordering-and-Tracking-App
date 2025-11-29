@@ -1,0 +1,412 @@
+首先你地要定義所有用戶類型之類嘅ts，注意這裏是ts并不是tsx：
+
+// 例如 屌.ts
+// 用戶相關類型
+export interface User {
+  custid: number;
+  custname: string;
+  phone: string;
+  email: string;
+  icon: string;
+  isValidate: boolean;
+  latestLoginDate: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  user: User;
+  token: string;
+  expiresAt: number;
+}
+
+export interface RegisterRequest {
+  userType: string;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  addressLine1: string;
+  city: string;
+  postalCode: string;
+}
+
+// menu相關類型
+export interface MenuItem {
+  itemId: number;
+  itemName: string;
+  description: string;
+  price: number;
+  category: string;
+  status: string;
+}
+
+export interface MenuResponse {
+  success: boolean;
+  menuItems: MenuItem[];
+}
+
+// 購物車相關類型
+export interface CartItem {
+  itemId: number;
+  itemName: string;
+  quantity: number;
+  price: number;
+  notes: string;
+  totalPrice: number;
+}
+
+// order相關類型
+export interface OrderItem {
+  itemId: number;
+  itemName: string;
+  quantity: number;
+  price: number;
+  notes: string;
+}
+
+export interface Order {
+  orderId: number;
+  status: string;
+  totalAmount: number;
+  discountAmount: number;
+  remark: string;
+  createdTime: string;
+  customerName: string;
+  restaurantName: string;
+  shippingAddress: string;
+  orderItems?: OrderItem[];
+}
+
+export interface OrderHistory {
+  status: string;
+  timestamp: string;
+  description: string;
+}
+
+export interface OrderDetailResponse {
+  success: boolean;
+  message: string;
+  order: Order;
+  history: OrderHistory[];
+}
+
+export interface CreateOrderRequest {
+  custid: number;
+  restid: number;
+  addressid: number;
+  shippingAddress: string;
+  remark: string;
+}
+
+export interface OrdersResponse {
+  success: boolean;
+  orders: Order[];
+}
+
+咁一個完整嘅例子是這樣的，最主要的是 useState, useEffect 這兩個，幾乎每一個tsx都需要：
+
+import React, { useState, useEffect } from 'react';
+import { User, MenuItem, CartItem, Order, OrderDetailResponse, CreateOrderRequest, OrdersResponse, MenuResponse} from './屌';
+
+const FoodOrderingApp: React.FC = () => {
+
+  const [menu, setMenu] = useState<MenuItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  // 瀏覽菜單
+  const loadMenu = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8080/api/menu/restaurant/1');
+      const data: MenuResponse = await response.json();
+      
+      if (data.success) {
+        setMenu(data.menuItems);
+      } else {
+        setError('加載菜單失敗');
+      }
+    } catch (err) {
+      setError('網絡錯誤，加載菜單失敗');
+      console.error('加載菜單失敗:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 添加到購物車
+  const addToCart = async (item: MenuItem): Promise<void> => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/cart/add?userId=1`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({
+          itemId: item.itemId,
+          itemName: item.itemName,
+          quantity: 1,
+          price: item.price,
+          notes: ''
+        })
+      });
+      
+      const result: string = await response.text();
+      console.log('添加結果:', result);
+      
+      // 重新加載購物車
+      await loadCart();
+    } catch (err) {
+      setError('添加商品失敗');
+      console.error('添加失敗:', err);
+    }
+  };
+
+  // 加載購物車
+  const loadCart = async (): Promise<void> => {
+    try {
+      const response = await fetch('http://localhost:8080/api/cart/items?userId=1');
+      const cartItems: CartItem[] = await response.json();
+      setCart(cartItems);
+    } catch (err) {
+      setError('加載購物車失敗');
+      console.error('加載購物車失敗:', err);
+    }
+  };
+
+  // 從購物車刪除商品
+  const removeFromCart = async (itemId: number): Promise<void> => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/cart/remove?userId=1&itemId=${itemId}`, {
+        method: 'DELETE'
+      });
+      
+      const result: string = await response.text();
+      console.log('刪除結果:', result);
+
+      await loadCart();
+    } catch (err) {
+      setError('刪除失敗');
+      console.error('刪除失敗:', err);
+    }
+  };
+
+  // 清空購物車
+  const clearCart = async (): Promise<void> => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/cart/clear?userId=1`, {
+        method: 'DELETE'
+      });
+      
+      const result: string = await response.text();
+      console.log('清空結果:', result);
+      setCart([]);
+    } catch (err) {
+      setError('清空購物車');
+      console.error('清空失敗:', err);
+    }
+  };
+
+  // 創建訂單
+  const createOrder = async (): Promise<void> => {
+    try {
+      const orderData: CreateOrderRequest = {
+        custid: 1,
+        restid: 1,
+        addressid: 1,
+        shippingAddress: '123 Main St, Central, HK',
+        remark: '備注'
+      };
+
+      const response = await fetch('http://localhost:8080/api/orders/create', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(orderData)
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('訂單創建成功:', data.order);
+        setCart([]); // 清空本地購物車
+        await loadOrders(); // 重新加載訂單
+        setError(''); // 清楚錯誤信息
+      } else {
+        setError(data.message || '創建訂單失敗');
+      }
+    } catch (err) {
+      setError('網絡錯誤，創建訂單失敗');
+      console.error('創建訂單失敗:', err);
+    }
+  };
+
+  // 加載用戶訂單
+  const loadOrders = async (): Promise<void> => {
+    try {
+      const response = await fetch('http://localhost:8080/api/orders/customer/1');
+      const data: OrdersResponse = await response.json();
+      
+      if (data.success) {
+        setOrders(data.orders);
+      } else {
+        setError('加載訂單失敗');
+      }
+    } catch (err) {
+      setError('網絡錯誤，無法加載訂單');
+      console.error('加載訂單失敗:', err);
+    }
+  };
+
+  // 獲取訂單詳細
+  const getOrderDetail = async (orderId: number): Promise<void> => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/orders/${orderId}`);
+      const data: OrderDetailResponse = await response.json();
+      
+      if (data.success) {
+        console.log('訂單詳細:', data);
+        // 這裏可以處理訂單詳細，比如顯示在模態框中等
+      } else {
+        setError('獲取訂單詳細失敗');
+      }
+    } catch (err) {
+      setError('網絡錯誤，無法獲取訂單詳細');
+      console.error('獲取訂單詳細失敗:', err);
+    }
+  };
+
+  // 計算購物車總價
+  const calculateCartTotal = (): number => {
+    return cart.reduce((total: number, item: CartItem) => total + item.totalPrice, 0);
+  };
+
+  // 組件加載時的初始化，如果不會做，就等我來做，或者你可以call ai help you
+  useEffect(() => {
+    loadMenu();
+    loadCart();
+    loadOrders();
+  }, []);
+
+  if (loading) {
+    return <div className="loading">加載中...</div>;
+  }
+
+  return (
+    <div className="food-ordering-app">
+      <h1>Food Ordering System</h1>
+      
+      {error && (
+        <div className="error-message" style={{ color: 'red', padding: '10px', border: '1px solid red' }}>
+          {error}
+          <button onClick={() => setError('')} style={{ marginLeft: '10px' }}>×</button>
+        </div>
+      )}
+
+      {/* 菜單顯示部分 */}
+      <section className="menu-section">
+        <h2>Menu</h2>
+        <div className="menu-grid">
+          {menu.map((item: MenuItem) => (
+            <div key={item.itemId} className="menu-item">
+              <h3>{item.itemName}</h3>
+              <p className="description">{item.description}</p>
+              <p className="price">${item.price}</p>
+              <p className="category">item{item.category}</p>
+              <button 
+                onClick={() => addToCart(item)}
+                disabled={item.status !== 'active'}
+                className={`add-button ${item.status !== 'active' ? 'disabled' : ''}`}
+              >
+                {item.status === 'active' ? '加入購物車' : '已銷售'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 購物車顯示部分 */}
+      <section className="cart-section">
+        <h2>購物車({cart.length} 件商品)</h2>
+        {cart.length === 0 ? (
+          <p>購物車爲空</p>
+        ) : (
+          <>
+            <div className="cart-items">
+              {cart.map((item: CartItem) => (
+                <div key={item.itemId} className="cart-item">
+                  <span className="item-name">{item.itemName}</span>
+                  <span className="quantity">x {item.quantity}</span>
+                  <span className="price">${item.totalPrice}</span>
+                  {item.notes && <span className="notes">({item.notes})</span>}
+                  <button 
+                    onClick={() => removeFromCart(item.itemId)}
+                    className="remove-button"
+                  >
+                    刪除
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="cart-total">
+              <strong>總計: ${calculateCartTotal().toFixed(2)}</strong>
+            </div>
+            <div className="cart-actions">
+              <button onClick={createOrder} className="order-button">
+                落單
+              </button>
+              <button onClick={clearCart} className="clear-button">
+                清空購物車
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* 订单显示部分 */}
+      <section className="orders-section">
+        <h2>我的訂單({orders.length} 个)</h2>
+        {orders.length === 0 ? (
+          <p>暫無訂單</p>
+        ) : (
+          <div className="orders-list">
+            {orders.map((order: Order) => (
+              <div key={order.orderId} className="order-card">
+                <div className="order-header">
+                  <h3>訂單{order.orderId}</h3>
+                  <span className={`status status-${order.status}`}>
+                    {order.status}
+                  </span>
+                </div>
+                <div className="order-details">
+                  <p餐廳: {order.restaurantName}</p>
+                  <p>顧客: {order.customerName}</p>
+                  <p>總價: ${order.totalAmount}</p>
+                  {order.discountAmount > 0 && (
+                    <p>折扣: -${order.discountAmount}</p>
+                  )}
+                  <p>備注: {order.remark || '无'}</p>
+                  <p>落單時間: {new Date(order.createdTime).toLocaleString()}</p>
+                  <p>地址: {order.shippingAddress}</p>
+                </div>
+                <button 
+                  onClick={() => getOrderDetail(order.orderId)}
+                  className="detail-button"
+                >
+                  查看詳細情
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
+export default FoodOrderingApp;

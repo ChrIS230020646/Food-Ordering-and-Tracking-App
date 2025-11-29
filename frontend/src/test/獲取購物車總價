@@ -1,0 +1,12 @@
+計算購物車總價
+async function getCartTotal() {
+  try {
+    const userId = 1;
+    const response = await fetch(`http://localhost:8080/api/cart/total?userId=${userId}`);
+    const total = await response.json();
+    console.log('購物車總價:', total);
+        return一個提示，例如85.5 (可以係int都可以係double)
+  } catch (error) {
+    console.error('獲取總價失敗:', error);
+  }
+}

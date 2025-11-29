@@ -6,6 +6,7 @@ import BackendTest from './components/BackendTest'
 import Register from './components/Register'
 import Login from './components/Login';
 import ResponsiveLayout from './components/ResponsiveLayout';
+import MenuTest from './test/MenuTest';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -61,6 +62,7 @@ function App() {
               <Route path="/register" element={<Register/>}/>
               <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />}/>
               <Route path="*" element={<NotFound/>}/>
+              <Route path="/menu-test" element={<MenuTest/>}/>
             </>
           )}
         </Routes>

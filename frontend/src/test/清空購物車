@@ -1,0 +1,15 @@
+清空整個購物車
+async function clearCart() {
+  try {
+    const userId = 1;
+    const response = await fetch(`http://localhost:8080/api/cart/clear?userId=${userId}`, {
+      method: 'DELETE'
+    });
+    
+    const result = await response.text();
+    console.log('清空結果:', result);
+       return一個提示，例如"購物車已經清空"
+  } catch (error) {
+    console.error('清空失敗:', error);
+  }
+}

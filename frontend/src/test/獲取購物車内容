@@ -1,0 +1,17 @@
+顧名思義，獲取當前用戶所有購物車的内容
+async function getCartItems() {
+  try {
+    const userId = 1;
+    const response = await fetch(`http://localhost:8080/api/cart/items?userId=${userId}`);
+    const cartItems = await response.json();
+    console.log('購物車内容:', cartItems);
+    
+        cartItems 是數組，包含:
+        itemId, itemName, quantity, price, notes, totalPrice
+    cartItems.forEach(item => {
+      console.log(`${item.itemName} x ${item.quantity} = $${item.totalPrice}`);
+    });
+  } catch (error) {
+    console.error('獲取購物車失敗:', error);
+  }
+}

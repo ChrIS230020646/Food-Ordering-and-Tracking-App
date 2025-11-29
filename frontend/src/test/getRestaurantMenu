@@ -1,0 +1,26 @@
+列子：
+
+async function getRestaurantMenu() {
+  try {
+    const response = await fetch('http://localhost:8080/api/menu/restaurant/1');
+    const data = await response.json();
+    console.log('Menu數據:', data);
+    
+    if (data.success) {
+      data.menuItems 菜單數組，包含以下屬性:
+
+      itemId: 商品ID (number)
+      itemName: 商品名稱 (string)
+      description: 商品描述 (string)
+      price: 價格 (number)
+      category: 分類 (string)
+      status: 狀態 'active' | 'inactive' | 'out_of_stock'
+      
+      data.menuItems.forEach(item => {
+        console.log(`商品: ${item.itemName}, 價格: $${item.price}, 狀態 ${item.status}`);
+      });
+    }
+  } catch (error) {
+    console.error('獲取菜單失敗:', error);
+  }
+}

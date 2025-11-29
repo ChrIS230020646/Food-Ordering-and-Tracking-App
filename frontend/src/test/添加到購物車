@@ -1,0 +1,25 @@
+添加到購物車
+async function addToCart() {
+  try {
+    const userId = 1;獲取用戶ID，這裏後期會用token代替，例子，唔好真係=1
+    const response = await fetch(`http://localhost:8080/api/cart/add?userId=${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        itemId: 1,商品ID (必須)
+        itemName: 'Har Gow',商品name (必須)
+        quantity: 2,數量 (必須)
+        price: 25.00,價錢 (必須)
+        notes: '這裏是話俾個店鋪知道有咩特別要求'備注 (可null)
+      })
+    });
+    
+    const result = await response.text();
+    console.log('添加購物車結果:', result);
+    return一個提示，例如"已添加到購物車" 或 "商品數量更新之類"
+  } catch (error) {
+    console.error('添加失敗:', error);
+  }
+}

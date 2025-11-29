@@ -1,0 +1,17 @@
+獲取單個商品詳細
+async function getMenuItem() {
+  try {
+    const response = await fetch('http://localhost:8080/api/menu/item/1');
+    const data = await response.json();
+    console.log('商品詳情:', data);
+    
+    if (data.success) {
+      data.menuItem 包含:
+      itemId, itemName, description, price, category, status
+      const item = data.menuItem;
+      console.log(`商品詳情: ${item.itemName} - ${item.description} - $${item.price}`);
+    }
+  } catch (error) {
+    console.error('獲取商品失敗:', error);
+  }
+}

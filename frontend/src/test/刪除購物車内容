@@ -1,0 +1,17 @@
+从购物车删除商品，test中，可能無效，如果無效就用清空購物車個method
+async function removeFromCart() {
+  try {
+    const userId = 1;
+    const itemId = 1;這裏是要刪除的商品id
+    
+    const response = await fetch(`http://localhost:8080/api/cart/remove?userId=${userId}&itemId=${itemId}`, {
+      method: 'DELETE'
+    });
+    
+    const result = await response.text();
+    console.log('del結果:', result);
+        return一個提示，例如"商品移除" 或 "商品不存在之類"
+  } catch (error) {
+    console.error('刪除失敗:', error);
+  }
+}

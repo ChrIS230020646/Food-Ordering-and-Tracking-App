@@ -1,0 +1,14 @@
+取消訂單
+async function cancelOrder() {
+  try {
+    const orderid = 1;
+    const response = await fetch(`http://localhost:8080/api/orders/${orderid}/cancel`, {
+      method: 'PUT'
+    });
+    
+    const data = await response.json();
+    console.log('取消訂單結過果:', data);
+  } catch (error) {
+    console.error('取消訂單失敗:', error);
+  }
+}

@@ -1,0 +1,21 @@
+更新個訂單狀態，呢個係比餐廳用
+async function updateOrderStatus() {
+  try {
+    const orderid = 1;
+    const response = await fetch(`http://localhost:8080/api/orders/${orderid}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: 'preparing'  新狀態: 'pending' | 'preparing' | 'ready' | 'out_for_delivery' | 'delivered' | 'cancelled' 
+                                        個流程由pending到delivered係set死要跟，cancel例外，個邏輯我未做完善。
+      })
+    });
+    
+    const data = await response.json();
+    console.log('更新狀態結果:', data);
+  } catch (error) {
+    console.error('更新狀態失敗:', error);
+  }
+}

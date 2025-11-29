@@ -1,0 +1,30 @@
+獲取訂單詳細
+async function getOrderDetail() {
+  try {
+    const orderid = 1;
+    const response = await fetch(`http://localhost:8080/api/orders/${orderid}`);
+    const data = await response.json();
+    console.log('訂單詳情:', data);
+    
+    if (data.success) {
+        data.order 包含:
+        orderId, status, totalAmount, discountAmount, remark, createdTime, customerName, restaurantName, shippingAddress
+        orderItems: 訂單商品詳細 (數組) 這裏睇情況show，單個商品可以唔show詳細都得，因爲如果條customer一次add太多商品，會show唔完
+      
+        data.history: 訂單歷史狀態 (數組)
+        每个历史记录包含: status, timestamp, description
+      
+      console.log('訂單商品:');
+      data.order.orderItems.forEach(item => {
+        console.log(`  ${item.itemName} x ${item.quantity} - $${item.price}`);
+      });
+      
+      console.log('狀態歷史:');
+      data.history.forEach(history => {
+        console.log(`  ${history.timestamp}: ${history.status} - ${history.description}`);
+      });
+    }
+  } catch (error) {
+    console.error('獲取訂單詳情失敗:', error);
+  }
+}

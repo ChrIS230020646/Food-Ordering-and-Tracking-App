@@ -1,0 +1,20 @@
+獲取用戶所有訂單
+async function getUserOrders() {
+  try {
+    const custid = 1;
+    const response = await fetch(`http://localhost:8080/api/orders/customer/${custid}`);
+    const data = await response.json();
+    console.log('訂單列表:', data);
+    
+    if (data.success) {
+        data.orders 訂單數組，包含:
+        orderId, status, totalAmount, discountAmount, remark, createdTime, customerName, restaurantName, shippingAddress
+      
+      data.orders.forEach(order => {
+        console.log(`訂單 ${order.orderId}: ${order.status} - $${order.totalAmount}`);
+      });
+    }
+  } catch (error) {
+    console.error('獲取訂單列表失敗:', error);
+  }
+}
