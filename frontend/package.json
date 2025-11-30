@@ -15,9 +15,9 @@
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "@radix-ui/react-toast": "^1.2.15",
-    "@toolpad/core": "^0.16.0",
     "@react-oauth/google": "^0.12.2",
     "@tailwindcss/vite": "^4.1.14",
+    "@toolpad/core": "^0.16.0",
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -39,6 +39,6 @@
     "globals": "^15.11.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.11.0",
-    "vite": "^5.4.10"
+    "vite": "^7.2.4"
   }
 }
