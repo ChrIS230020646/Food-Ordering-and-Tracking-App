@@ -13,7 +13,6 @@ import {
   ListItemText,
   Divider,
   IconButton,
-  Collapse,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
@@ -24,16 +23,13 @@ import HistoryIcon from '@mui/icons-material/History';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import InfoIcon from '@mui/icons-material/Info';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 import MyOrders from '../pages/MyOrders';
-import OrderHistory from '../pages/OrderHistory';
 import DeliveryStatus from '../pages/DeliveryStatus';
 import MyProfile from '../pages/MyProfile';
-import OrderInformation from '../pages/OrderInformation';
+import RestaurantDetail from '../pages/RestaurantDetail';
+import Checkout from '../pages/Checkout';
 
 const drawerWidth = 260;
 
@@ -92,15 +88,6 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
     return (savedMode === 'light' || savedMode === 'dark') ? savedMode : 'dark';
   });
 
-  // Order Management expand/collapse state
-  const [orderManagementOpen, setOrderManagementOpen] = React.useState(false);
-
-  // Auto-expand Order Management if on delivery status page
-  React.useEffect(() => {
-    if (location.pathname === '/dashboard/delivery') {
-      setOrderManagementOpen(true);
-    }
-  }, [location.pathname]);
 
   // Create theme based on mode
   const theme = React.useMemo(
@@ -174,7 +161,7 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
     // Orders section
     items.push({ type: 'header', label: 'Orders' });
 
-    // Customer: My Orders, Order Information, and Order History
+    // Customer: My Orders and Order History
     if (userRole === 'customer') {
       items.push({
         type: 'item',
@@ -184,31 +171,24 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
       });
       items.push({
         type: 'item',
-        label: 'Order Information',
-        icon: <InfoIcon />,
-        path: '/dashboard/order-information',
-      });
-      items.push({
-        type: 'item',
         label: 'Order History',
         icon: <HistoryIcon />,
         path: '/dashboard/order-history',
       });
     }
-    // Delivery Staff: Order Management (with dropdown), Order Information, and Order History
+    // Delivery Staff: Orders and Delivery Status only
     else if (userRole === 'delivery') {
-      // Order Management will be added separately in the render
       items.push({
         type: 'item',
-        label: 'Order Information',
-        icon: <InfoIcon />,
-        path: '/dashboard/order-information',
+        label: 'Orders',
+        icon: <ShoppingCartIcon />,
+        path: '/dashboard/orders',
       });
       items.push({
         type: 'item',
-        label: 'Order History',
-        icon: <HistoryIcon />,
-        path: '/dashboard/order-history',
+        label: 'Delivery Status',
+        icon: <DeliveryDiningIcon />,
+        path: '/dashboard/delivery',
       });
     }
     // Restaurant: Order Information and Order History
@@ -216,7 +196,7 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
       items.push({
         type: 'item',
         label: 'Order Information',
-        icon: <InfoIcon />,
+        icon: <ShoppingCartIcon />,
         path: '/dashboard/order-information',
       });
       items.push({
@@ -237,7 +217,7 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
       items.push({
         type: 'item',
         label: 'Order Information',
-        icon: <InfoIcon />,
+        icon: <ShoppingCartIcon />,
         path: '/dashboard/order-information',
       });
       items.push({
@@ -308,16 +288,34 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
       content = <MyOrders />;
       break;
     case '/dashboard/order-history':
-      content = <OrderHistory />;
+      // Redirect delivery staff away from order history
+      if (userRole === 'delivery') {
+        content = <MyOrders />;
+      } else {
+        // For other roles, you may want to import OrderHistory if needed
+        content = <MyOrders />; // Placeholder - adjust if needed
+      }
       break;
     case '/dashboard/order-information':
-      content = <OrderInformation />;
+      // Redirect delivery staff away from order information
+      if (userRole === 'delivery') {
+        content = <MyOrders />;
+      } else {
+        // For other roles, you may want to import OrderInformation if needed
+        content = <MyOrders />; // Placeholder - adjust if needed
+      }
       break;
     case '/dashboard/delivery':
       content = <DeliveryStatus />;
       break;
     case '/dashboard/profile':
       content = <MyProfile />;
+      break;
+    case '/dashboard/restaurant':
+      content = <RestaurantDetail />;
+      break;
+    case '/dashboard/checkout':
+      content = <Checkout />;
       break;
     default:
       // Default: show Dashboard for customer/restaurant, MyOrders for delivery
@@ -373,7 +371,6 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
             <List>
               {navItems.map((item, index) => {
                 if (item.type === 'header') {
-                  const isOrdersHeader = item.label === 'Orders';
                   return (
                     <React.Fragment key={`header-${index}`}>
                       <ListItem>
@@ -384,55 +381,6 @@ function ResponsiveLayout({ onLogout }: ResponsiveLayoutProps) {
                           {item.label}
                         </Typography>
                       </ListItem>
-                      {/* Order Management with dropdown - only for delivery staff, placed after Orders header */}
-                      {isOrdersHeader && userRole === 'delivery' && (
-                        <>
-                          <ListItem disablePadding>
-                            <ListItemButton
-                              onClick={() => setOrderManagementOpen(!orderManagementOpen)}
-                              selected={normalizedPath === '/dashboard/orders' || normalizedPath === '/dashboard/delivery'}
-                            >
-                              <ListItemIcon sx={{ color: 'inherit' }}>
-                                <ShoppingCartIcon />
-                              </ListItemIcon>
-                              <ListItemText primary="Order Management" />
-                              {orderManagementOpen ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton>
-                          </ListItem>
-                          <Collapse in={orderManagementOpen} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                              <ListItemButton
-                                sx={{ pl: 4 }}
-                                selected={normalizedPath === '/dashboard/orders'}
-                                onClick={() => {
-                                  if (location.pathname !== '/dashboard/orders') {
-                                    navigate('/dashboard/orders');
-                                  }
-                                }}
-                              >
-                                <ListItemIcon sx={{ color: 'inherit' }}>
-                                  <ShoppingCartIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Orders" />
-                              </ListItemButton>
-                              <ListItemButton
-                                sx={{ pl: 4 }}
-                                selected={normalizedPath === '/dashboard/delivery'}
-                                onClick={() => {
-                                  if (location.pathname !== '/dashboard/delivery') {
-                                    navigate('/dashboard/delivery');
-                                  }
-                                }}
-                              >
-                                <ListItemIcon sx={{ color: 'inherit' }}>
-                                  <DeliveryDiningIcon />
-                                </ListItemIcon>
-                                <ListItemText primary="Delivery Status" />
-                              </ListItemButton>
-                            </List>
-                          </Collapse>
-                        </>
-                      )}
                     </React.Fragment>
                   );
                 }
