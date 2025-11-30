@@ -171,6 +171,29 @@ public class OrderController {
         }
     }
 
+    /**
+     * Cancel an order (Delivery Staff only)
+     * Delivery staff can cancel orders that are assigned to them
+     */
+    @PutMapping("/{orderId}/cancel")
+    public ResponseEntity<?> cancelOrder(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable Integer orderId) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Missing or invalid authorization header");
+            }
+
+            String token = authHeader.substring(7);
+            OrderDTO order = orderService.cancelOrder(token, orderId);
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error cancelling order: " + e.getMessage());
+        }
+    }
+
     @lombok.Data
     @lombok.AllArgsConstructor
     @lombok.NoArgsConstructor

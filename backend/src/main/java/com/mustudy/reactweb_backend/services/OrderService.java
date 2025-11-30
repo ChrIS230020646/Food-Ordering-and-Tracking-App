@@ -193,6 +193,40 @@ public class OrderService {
         return convertToDTO(order);
     }
 
+    @Transactional
+    public OrderDTO cancelOrder(String token, Integer orderId) {
+        // Check if token is from delivery staff
+        Integer staffId = jwtService.getStaffIdFromToken(token);
+        
+        if (staffId == null) {
+            throw new RuntimeException("Invalid token or not a delivery staff token");
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Verify that the order is assigned to this delivery staff
+        if (order.getDeliverManId() == null || !order.getDeliverManId().equals(staffId)) {
+            throw new RuntimeException("You can only cancel orders assigned to you");
+        }
+
+        // Check if order can be cancelled (only delivering orders can be cancelled by delivery staff)
+        if (order.getStatus() == Order.OrderStatus.delivered || 
+            order.getStatus() == Order.OrderStatus.cancelled) {
+            throw new RuntimeException("Cannot cancel order with status: " + order.getStatus());
+        }
+
+        // Release the order back to pending status so other delivery staff can accept it
+        // Remove delivery staff assignment and reset delivery times
+        order.setStatus(Order.OrderStatus.pending);
+        order.setDeliverManId(null);
+        order.setStartDeliverTime(null);
+        order.setEndDeliverTime(null);
+        order = orderRepository.save(order);
+
+        return convertToDTO(order);
+    }
+
     private Integer getCustomerIdFromToken(String token) {
         try {
             var claims = jwtService.parseToken(token);

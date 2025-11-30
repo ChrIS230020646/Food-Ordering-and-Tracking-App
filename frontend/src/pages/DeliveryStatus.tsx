@@ -278,10 +278,23 @@ const DeliveryStatus: React.FC = () => {
       // Reload orders to get updated data
       await loadOrders();
       
-      alert('Order cancelled successfully!');
+      alert('Order cancelled successfully! The order is now available for other delivery staff.');
     } catch (error: any) {
       console.error('Error cancelling order:', error);
-      alert(`Failed to cancel order: ${error.response?.data || error.message}`);
+      // Handle error message properly
+      let errorMessage = 'Failed to cancel order';
+      if (error.response?.data) {
+        if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else {
+          errorMessage = JSON.stringify(error.response.data);
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      alert(`Failed to cancel order: ${errorMessage}`);
     }
   };
 
@@ -465,15 +478,18 @@ const DeliveryStatus: React.FC = () => {
                 {/* Action Buttons - Show for delivering orders */}
                 {order.status === 'delivering' && (
                   <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<CancelIcon />}
-                      onClick={() => handleCancelOrder(order)}
-                      color="error"
-                      sx={{ flex: 1, minWidth: '150px' }}
-                    >
-                      Cancel Order
-                    </Button>
+                    {/* Only show Cancel Order button for delivery staff */}
+                    {userRole === 'delivery' && (
+                      <Button
+                        variant="outlined"
+                        startIcon={<CancelIcon />}
+                        onClick={() => handleCancelOrder(order)}
+                        color="error"
+                        sx={{ flex: 1, minWidth: '150px' }}
+                      >
+                        Cancel Order
+                      </Button>
+                    )}
                     <Button
                       variant="outlined"
                       startIcon={<PhoneIcon />}

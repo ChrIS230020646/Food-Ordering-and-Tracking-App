@@ -50,6 +50,26 @@ const getUserInfo = () => {
           ...user
         };
       }
+      // Ensure role is set from user object or token
+      // If user object doesn't have role, check token
+      if (!user.role) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return {
+              ...user,
+              role: payload.role || user.role || 'customer'
+            };
+          } catch (e) {
+            // If token parsing fails, default to customer
+            return {
+              ...user,
+              role: user.role || 'customer'
+            };
+          }
+        }
+      }
       // Otherwise return as is (customer or delivery staff)
       return user;
     }
@@ -154,7 +174,8 @@ const MyProfile: React.FC = () => {
     const info = getUserInfo();
     setUserInfo(info);
     loadProfile();
-    loadAddresses();
+    // Pass info to loadAddresses to avoid state timing issues
+    loadAddresses(info);
     // Only load payment method for customers
     if (info?.role !== 'restaurant') {
       loadPaymentMethod();
@@ -283,8 +304,8 @@ const MyProfile: React.FC = () => {
             });
           }
         }
-      } else {
-        // Customer
+      } else if (info.role === 'customer') {
+        // Customer - only load if explicitly customer role
         try {
           const customerProfile: CustomerProfile = await backendApi.getCustomerProfile();
           setProfile({
@@ -325,6 +346,40 @@ const MyProfile: React.FC = () => {
             });
           }
         }
+      } else {
+        // Unknown role or role not set - use fallback from localStorage/token
+        console.warn('Unknown user role:', info.role);
+        const userStr = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            setProfile({
+              ...user,
+              name: user.name || user.custname || 'User',
+              email: user.email || '',
+              phone: user.phone || ''
+            });
+          } catch (e) {
+            console.error('Error parsing user from localStorage:', e);
+            setError('Unable to determine user role. Please log in again.');
+          }
+        } else if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            setProfile({
+              name: payload.name || 'User',
+              email: payload.email || '',
+              phone: payload.phone || ''
+            });
+          } catch (e) {
+            console.error('Error parsing token:', e);
+            setError('Unable to determine user role. Please log in again.');
+          }
+        } else {
+          setError('Unable to determine user role. Please log in again.');
+        }
       }
     } catch (err: any) {
       console.error('Error loading profile:', err);
@@ -334,9 +389,12 @@ const MyProfile: React.FC = () => {
     }
   };
 
-  const loadAddresses = async () => {
+  const loadAddresses = async (info?: any) => {
+    // Use passed info or fallback to userInfo state
+    const userRole = info?.role || userInfo?.role;
+    
     // Only load addresses for customers
-    if (userInfo?.role !== 'customer') {
+    if (userRole !== 'customer') {
       setAddresses([]);
       return;
     }

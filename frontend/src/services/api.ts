@@ -412,7 +412,7 @@ export const backendApi = {
    * Get current delivery staff profile
    */
   getDeliveryStaffProfile: (): Promise<DeliveryStaffProfile> =>
-    api.get('/delivery-staff/profile').then(res => res.data),
+    api.get('/delivery/profile').then(res => res.data),
 
   /**
    * Get available orders for delivery staff
