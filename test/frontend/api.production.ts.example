@@ -1,0 +1,109 @@
+// 生產環境 API 配置示例
+// 將此文件複製到 frontend/src/services/api.production.ts
+// 並在構建時使用環境變數
+
+import axios from 'axios';
+
+// 從環境變數讀取 API 基礎 URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// 請求攔截器 - 添加 JWT token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// 響應攔截器 - 處理 token 過期
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token 過期，清除本地存儲並重定向到登錄頁
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface RegisterData {
+  username: string;
+  email: string;
+  phone: string;
+  password: string;
+  userType: string;
+  location: string;
+  name: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  restname?: string;
+  description?: string;
+  address?: string;
+  cuisine?: string;
+  vehicleType?: string;
+  licenseNumber?: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+  userType: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  user?: any;
+  token?: string;
+  expiresAt?: number;
+}
+
+export const backendApi = {
+  healthCheck: (): Promise<string> => 
+    api.get('/health').then(res => res.data),
+
+  sayHello: (name: string): Promise<string> => 
+    api.get(`/hello/${name}`).then(res => res.data),
+  
+  getUsers: (): Promise<User[]> => 
+    api.get('/users').then(res => res.data),
+  
+  createUser: (user: Omit<User, 'id'>): Promise<User> => 
+    api.post('/user', user).then(res => res.data),
+
+  register: (data: RegisterData): Promise<any> =>
+    api.post('/auth/register', data).then(res => res.data),
+
+  login: (data: LoginData): Promise<any> =>
+    api.post('/auth/login', data).then(res => res.data),
+};
+
+export default api;
+
+
