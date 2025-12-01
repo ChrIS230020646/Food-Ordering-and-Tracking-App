@@ -50,7 +50,7 @@ public class Order {
     private Timestamp endDeliverTime;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", length = 20)
     private OrderStatus status = OrderStatus.pending;
     
     @Column(name = "remark", columnDefinition = "TEXT")
