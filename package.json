@@ -1,0 +1,39 @@
+{
+  "name": "reactweb",
+  "version": "1.0.0",
+  "description": "Fullstack Food Order Application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && (./mvnw spring-boot:run || mvnw.cmd spring-boot:run)",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && (./mvnw clean install -DskipTests || mvnw.cmd clean install -DskipTests)",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && (./mvnw clean package -DskipTests || mvnw.cmd clean package -DskipTests)",
+    "clean": "npm run clean:frontend && npm run clean:backend",
+    "clean:frontend": "cd frontend && (rm -rf node_modules dist || rmdir /s /q node_modules dist)",
+    "clean:backend": "cd backend && (./mvnw clean || mvnw.cmd clean)",
+    "dev:win": "concurrently \"npm run dev:backend:win\" \"npm run dev:frontend\"",
+    "dev:mac": "concurrently \"npm run dev:backend:mac\" \"npm run dev:frontend\"",
+    "dev:backend:win": "cd backend && mvnw.cmd spring-boot:run",
+    "dev:backend:mac": "cd backend && ./mvnw spring-boot:run",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChrIS230020646/Food-Ordering-and-Tracking-App.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChrIS230020646/Food-Ordering-and-Tracking-App/issues"
+  },
+  "homepage": "https://github.com/ChrIS230020646/Food-Ordering-and-Tracking-App#readme",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
