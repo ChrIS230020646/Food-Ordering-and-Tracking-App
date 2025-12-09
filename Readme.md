@@ -79,18 +79,6 @@ frontend/
 
 ## Setup Instructions
 
-### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd <project-directory>
-```
-
-### 2. Database Setup
-1. Start MySQL server
-2. Create a database for the application:
-```sql
-CREATE DATABASE food_delivery_db;
-```
 3. Update database credentials in `backend/src/main/resources/application.properties`
 
 ### 3. Backend Setup (Spring Boot)
