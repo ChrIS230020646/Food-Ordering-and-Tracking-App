@@ -1,3 +1,5 @@
+## backend/controller/*
+  用api去call到frontend
 You need to start the backend first, then start the frontend.
 
 backend：
