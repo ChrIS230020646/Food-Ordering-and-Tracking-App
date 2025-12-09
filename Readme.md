@@ -71,8 +71,8 @@ frontend/
 
 ## Prerequisites
 
-- **Java 11+**
-- **Node.js 16+**
+- **Java 21.0.1+**
+- **Node.js v22.20.0+**
 - **MySQL 8.0+**
 - **Maven** (or use provided Maven Wrapper)
 - **npm** or **yarn**
