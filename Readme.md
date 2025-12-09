@@ -116,27 +116,154 @@ npm run dev
 
 The frontend will start on `http://localhost:5173` (or another available port)
 
-## API Endpoints
+# Food Delivery Platform API Documentation
 
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
+## Authentication
 
-### Customer
-- `GET /api/customer/restaurants` - List all restaurants
-- `GET /api/customer/menu/{restaurantId}` - Get restaurant menu
-- `POST /api/customer/order` - Place an order
-- `GET /api/customer/orders/history` - Order history
+### Login
+- **Endpoint**: `POST http://localhost:8080/api/auth/login`
+- **Description**: Authenticate user and obtain JWT token
+- **Request Body**:
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "userType": "customer|restaurant|delivery"
+}
+```
+- **Sample Request**:
+```json
+{
+  "email": "trs1@gmail.com",
+  "password": "password2",
+  "userType": "restaurant"
+}
+```
 
-### Restaurant
-- `POST /api/restaurant/menu` - Add menu item
-- `GET /api/restaurant/orders` - View incoming orders
-- `PUT /api/restaurant/order/{orderId}/confirm` - Confirm order for delivery
+## Restaurant APIs
 
-### Delivery
-- `GET /api/delivery/available-orders` - View available delivery orders
-- `POST /api/delivery/order/{orderId}/accept` - Accept delivery order
-- `PUT /api/delivery/order/{orderId}/status` - Update delivery status
+### Get All Restaurants
+- **Endpoint**: `GET http://localhost:8080/api/restaurants`
+- **Description**: Retrieve list of all restaurants
+- **Authentication**: Required
+- **User Types**: Customer, Restaurant
+
+### Add Menu Item
+- **Endpoint**: `POST http://localhost:8080/api/restaurant/menu`
+- **Description**: Add new item to restaurant menu
+- **Authentication**: Required (Restaurant only)
+- **Request Body**:
+```json
+{
+  "item_name": "Food Item Name",
+  "description": "Food description",
+  "price": 99.99
+}
+```
+- **Sample Request**:
+```json
+{
+  "item_name": "TestFoodOne",
+  "description": "TestFoodOne",
+  "price": 45.00
+}
+```
+
+### Get Restaurant Menu
+- **Endpoint**: `GET http://localhost:8080/api/restaurants/{restaurantId}/menu`
+- **Description**: Retrieve menu for specific restaurant
+- **Parameters**: `restaurantId` - ID of the restaurant
+- **Authentication**: Required
+- **User Types**: Customer, Restaurant
+- **Example**: `GET http://localhost:8080/api/restaurants/8/menu`
+
+## Customer APIs
+
+### Place Order
+- **Endpoint**: `POST http://localhost:8080/api/orders`
+- **Description**: Create a new food order
+- **Authentication**: Required (Customer only)
+- **Request Body**:
+```json
+{
+  "restid": 8,
+  "totalAmount": 130.00,
+  "address": "123 Test Street, HK",
+  "phone": "98765432",
+  "items": [
+    {
+      "itemId": 21,
+      "itemName": "TestFoodOne",
+      "quantity": 1,
+      "price": 45.00
+    },
+    {
+      "itemId": 22,
+      "itemName": "TestFoodTwo",
+      "quantity": 1,
+      "price": 85.00
+    }
+  ]
+}
+```
+
+## Delivery Staff APIs
+
+### Get Pending Orders
+- **Endpoint**: `GET http://localhost:8080/api/orders/pending`
+- **Description**: Retrieve all pending delivery orders
+- **Authentication**: Required (Delivery staff only)
+
+### Update Order Status
+- **Endpoint**: `PUT http://localhost:8080/api/orders/{orderId}/status`
+- **Description**: Update delivery status of an order
+- **Parameters**: `orderId` - ID of the order
+- **Authentication**: Required (Delivery staff only)
+- **Request Body**:
+```json
+{
+  "status": "delivered"
+}
+```
+- **Example**: `PUT http://localhost:8080/api/orders/3/status`
+
+
+## Error Responses
+- `200 OK` - Request successful
+- `201 Created` - Resource created successfully
+- `400 Bad Request` - Invalid request parameters
+- `401 Unauthorized` - Missing or invalid authentication
+- `403 Forbidden` - Insufficient permissions
+- `404 Not Found` - Resource not found
+- `500 Internal Server Error` - Server error
+
+## Testing with cURL
+
+### Login as Restaurant:
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"trs1@gmail.com","password":"password2","userType":"restaurant"}'
+```
+
+### Get Restaurant Menu:
+```bash
+curl -X GET http://localhost:8080/api/restaurants/8/menu \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Place an Order:
+```bash
+curl -X POST http://localhost:8080/api/orders \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"restid":8,"totalAmount":130.00,"address":"123 Test Street, HK","phone":"98765432","items":[{"itemId":21,"itemName":"TestFoodOne","quantity":1,"price":45.00}]}'
+```
+
+## Default Test Users
+1. **Restaurant**: Email: `trs1@gmail.com`, Password: `password2`
+2. **Delivery Staff**: Email: `tso@gmail.com`, Password: `password2`
+3. **Customer**: Use registration endpoint to create account
 
 ## Environment Configuration
 
