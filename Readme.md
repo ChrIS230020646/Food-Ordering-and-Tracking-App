@@ -196,7 +196,3 @@ VITE_API_BASE_URL=http://localhost:8080/api
 ### macOS/Linux Specific
 - If `mvnw` permission denied, run: `chmod +x mvnw`
 - Ensure Java 11+ is installed and configured
-
-## License
-
-This project is for educational purposes.
